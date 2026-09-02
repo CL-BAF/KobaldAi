@@ -1,0 +1,14 @@
+# Copy to config/local.toml for machine-specific development settings.
+# Local configuration is ignored by Git.
+
+[runtime]
+state_directory = "state"
+log_directory = "logs"
+
+[control_plane]
+host = "127.0.0.1"
+port = 8774
+
+[policy]
+default_action = "deny"
+require_explicit_asset_authority = true

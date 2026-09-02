@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+dist/
+build/
+
+# Environments and local configuration
+.venv/
+venv/
+.env
+.env.*
+!.env.example
+config/local.*
+
+# Kobald runtime state and secrets
+data/
+state/
+logs/
+models/
+datasets/
+secrets/
+*.key
+*.pem
+
+# Editors and operating systems
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
