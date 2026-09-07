@@ -17,6 +17,7 @@ venv/
 .env
 .env.*
 !.env.example
+!.env.*.example
 config/local.*
 
 # Kobald runtime state and secrets
@@ -28,6 +29,16 @@ datasets/
 secrets/
 *.key
 *.pem
+*.p12
+*.pfx
+*.token
+
+# Local AI/agent runtime state
+.claude/
+.codex/
+.opencode/
+.opencode-comms/
+.opencode-orchestrator/
 
 # Editors and operating systems
 .idea/
