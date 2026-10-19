@@ -1,25 +1,26 @@
 # KobaldAi
 
-KobaldAi is the canonical source repository for Kobald: a locally operated AI and
-smart-systems platform built around evidence, explicit authority, auditable tool
-use, and human control over important actions.
+**Kobald is an evidence-first AI harness for scientific investigation.** Its long-term purpose is to help researchers use interchangeable AI models alongside scientific software, simulations, datasets, analytical tools and—where safely authorised—laboratory instrumentation.
 
-This repository is a clean successor to the legacy
-[`CL-BAF/Kobald`](https://github.com/CL-BAF/Kobald) prototype. Legacy components
-will be audited and migrated one subsystem at a time with their tests. The old
-repository remains a reference implementation; it is not copied wholesale.
+Kobald is **not primarily an everyday personal assistant**. The intended system is a research orchestration layer: models can propose analyses, invoke constrained scientific tools, preserve inputs and outputs, compare results with evidence, and present reproducible findings for human examination. Scientific conclusions are not validated merely because an AI or tool produced them.
+
+Scientific domains under consideration include physics simulation, chemistry and chemical data analysis, computational biology, mathematics, engineering and experimental data processing. Planned instrument connectors are **not** a claim of existing laboratory control.
+
+This is the canonical successor to the legacy [`CL-BAF/Kobald`](https://github.com/CL-BAF/Kobald) prototype. Existing security, evidence, agent and model-provider work is foundation material to evaluate and migrate—not evidence that the proposed scientific integrations already exist.
+
+**Separate project:** [Domovoi](https://github.com/CL-BAF/Domovoi-Kobald_showcase) is a proposed, long-term investigation into more memory- and compute-efficient AI architectures. Domovoi research has not yet produced a validated model or benchmark result. Kobald must remain useful with existing models whether or not Domovoi succeeds.
 
 ## Current status
 
-**v0.1 foundation bootstrap**
+**v0.1 foundation bootstrap; scientific focus is a planned direction, not implemented functionality.**
 
-- package and domain boundaries established
-- architecture, roadmap, security, training and migration decisions documented
-- automated quality checks and tests configured
-- no legacy runtime implementation migrated yet
+- Package and domain boundaries, architecture, roadmap, security and migration decisions are documented.
+- Automated quality checks and tests are configured.
+- No legacy runtime implementation has been migrated into this canonical repository yet.
+- Physics-engine adapters, chemical analysis workflows, scientific instrument connectors and end-to-end scientific experiments are **not implemented** here.
+- The older Kobald prototype contains evidence/provenance and controlled research workflow foundations; these need deliberate migration and revalidation.
 
-See [the migration manifest](docs/MIGRATION.md) for the authoritative component
-status and [the roadmap](docs/ROADMAP.md) for the order of work.
+See the [migration manifest](docs/MIGRATION.md) for component status and the [roadmap](docs/ROADMAP.md) for delivery stages.
 
 ## Repository roles
 
@@ -73,14 +74,40 @@ The operator interfaces (Command Centre, CLI, Pocket Kobald and any future web
 client) must use the shared control-plane protocol rather than reimplementing
 Kobald behaviour.
 
+## Scientific research workflow (target design)
+
+```text
+Research question / hypothesis
+    -> select datasets and approved scientific tools
+    -> capture inputs, units, assumptions and versions
+    -> run simulations or analysis in isolated, bounded environments
+    -> record outputs, parameters, errors and provenance
+    -> compare predictions with reference evidence or observations
+    -> flag uncertainties, contradictions and reproducibility limits
+    -> researcher reviews findings and decides subsequent experiments
+```
+
+**Planned scientific capability areas**
+
+| Area | Intended capability | Status |
+|---|---|---|
+| Physics and engineering | Invoke simulation engines and analyse results | Proposed; no integration |
+| Chemistry | Use chemical datasets and computational analysis tools | Proposed; no integration |
+| Instruments and sensors | Read measurements through authenticated, documented connectors | Proposed; no live connector |
+| Mathematics and data science | Reproducible computations and statistical analysis | Proposed; no scientific execution engine |
+| Scientific evidence | Source lineage, units, assumptions, methods, comparison and review | Existing legacy foundations only; migration pending |
+
+Instrument control and any change to physical equipment must be explicitly authorised, policy-checked, independently interlocked where needed and reviewed by a qualified human operator. Start with **offline files, simulated instruments and read-only measurements**. An AI-generated command must never by itself authorise an experiment or device actuation.
+
 ## Non-negotiable migration rules
 
 1. Migrate one bounded subsystem at a time.
-2. Understand and document the legacy behaviour before porting it.
+2. Understand and document legacy behaviour before porting it.
 3. Bring or rewrite tests with every migrated subsystem.
 4. Keep policy, audit and execution responsibilities separate.
 5. Never silently weaken approval, provenance or state-integrity guarantees.
 6. Add regression tests for every known legacy failure being preserved against.
+7. Test scientific unit correctness, reproducibility, unsafe action rejection and provenance before treating any scientific adapter as usable.
 
 ## Documentation
 
