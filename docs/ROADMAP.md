@@ -1,5 +1,11 @@
 # Roadmap
 
+## Mission
+
+Develop Kobald as a **scientific AI harness**, not a general-purpose daily assistant. Scientific simulation, chemical analysis, measurable research workflows and controlled laboratory-data integrations are the destination. Existing models can power Kobald independently of any future Domovoi research outcome.
+
+This is a staged, potentially multi-year research-engineering direction, **not** a claim that scientific integrations already exist. Phase labels indicate technical dependencies, not promises about timing.
+
 The order is deliberate. A later phase must not weaken guarantees established by
 an earlier one.
 
@@ -50,8 +56,11 @@ and tests for rejection/failure paths.
 - [ ] Suspicious-behaviour reporting
 - [ ] Clear separation from WARDEN authority
 
-## Phase 5: Research and training system
+## Phase 5: Scientific research and evaluation system
 
+- [ ] Reproducible scientific job specification: inputs, units, methods, versions, seeds and budgets
+- [ ] Sandboxed simulation runner and independently testable result capture
+- [ ] Read-only chemistry/data-analysis adapter with a small openly documented test dataset
 - [ ] Real research-task execution backend
 - [ ] Raw and scored trajectory stores
 - [ ] Supervisor verification pipeline
@@ -67,7 +76,20 @@ and tests for rejection/failure paths.
 - [ ] Cut clients over only after acceptance gates pass
 - [ ] Freeze the legacy implementation as read-only reference
 - [ ] Introduce managed hardware, sensor and security-tool integrations
+- [ ] Introduce scientific instrument connectors only after read-only simulation, policy testing, approval and device-specific safety reviews
 - [ ] Update `Kobald_Showcase` from proven KobaldAi results
+
+## Scientific expansion after foundation phases
+
+These milestones may run across multiple releases after the core runtime and security boundaries exist:
+
+1. **First reproducible dry-lab demonstration:** use a documented physics or numerical simulation and independently check outputs against known results.
+2. **Computational chemistry demonstration:** analyse existing chemical data without controlling a physical instrument.
+3. **Instrument interoperability:** define typed connectors and replayable synthetic instrument messages, then trial read-only hardware measurements with appropriate supervision.
+4. **Research workflows:** compose analyses, maintain data and method lineage, quantify uncertainty and enable human comparison of experimental runs.
+5. **Research-grade evaluation:** benchmark correctness, repeatability, cost, failure handling, user oversight and security—not just LLM answer quality.
+
+Physical experiment initiation, hazardous actuation and autonomous laboratory control are not baseline milestones and require separate safety, governance and specialist review.
 
 ## Parallel evidence work
 
