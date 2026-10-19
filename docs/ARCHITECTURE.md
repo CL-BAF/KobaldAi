@@ -2,9 +2,9 @@
 
 ## Purpose
 
-KobaldAi is the canonical implementation of Kobald. It coordinates models, tools,
-knowledge and managed systems while keeping authority, execution, oversight and
-audit responsibilities separate.
+KobaldAi is the canonical implementation of **Kobald, a proposed scientific AI harness**. It aims to coordinate interchangeable models with trusted scientific software, reproducible computations, research datasets, analytical instruments and human researchers, while keeping authority, execution, oversight and audit responsibilities separate.
+
+It is not intended to be optimised around daily personal-assistant tasks. The scientific integrations described below are architectural targets and do not imply they are implemented.
 
 ## Core execution flow
 
@@ -23,6 +23,14 @@ Objective
   -> agent continues or task terminates
 ```
 
+## Scientific workflow contract (planned)
+
+A future scientific tool call should carry a structured manifest with the experiment or analysis identifier, tool version, input dataset identity and checksum, parameter values and units, numerical precision/tolerances where relevant, random seeds, environment, time/resource budgets, expected output schema and required approval scope.
+
+The corresponding observation should retain output artifacts and hashes, warnings/errors, tool version, provenance, execution context and known limitations. Models may interpret results, but cannot overwrite underlying measurements or approve their own conclusions.
+
+Initial tool integrations should be sandboxed simulations and offline analysis. Instrument connectors begin with read-only or synthetic data. A connector must not execute state-changing laboratory operations without external safeguards, explicit human authority and device-appropriate safety controls.
+
 ## Responsibilities
 
 | Domain | Owns | Must not own |
@@ -36,7 +44,8 @@ Objective
 | `agents` | planning and proposed actions | bypassing policy or directly calling integrations |
 | `runtime` | task lifecycle, state and orchestration | UI-specific behaviour |
 | `supervisor` | progress and output verification | final policy authority |
-| `research` | research jobs and evidence evaluation | training models directly |
+| `research` | research jobs, reproducibility metadata and scientific evidence evaluation | training models directly |
+| scientific adapters (planned within `integrations`) | typed simulators, analysis programs and constrained instrument access | interpreting results as authoritative or bypassing safety controls |
 | `training` | datasets, evaluation, fine-tuning and registry | live runtime authority |
 | `api` | shared control-plane contract and transport | duplicating core behaviour |
 | `integrations` | constrained external operations | independently granting authority |
