@@ -16,7 +16,7 @@ This is the canonical successor to the legacy [`CL-BAF/Kobald`](https://github.c
 
 - Two engine paths are operational end-to-end. Both use Pint unit validation, a deny-by-default execution gate, a subprocess sandbox, independent closed-form verification, reproducible records and reports. See [scientific execution](docs/SCIENTIFIC_EXECUTION.md) and the [engine compatibility matrix](docs/SCIENCE_ENGINES.md).
   - SciPy ODE integration (damped oscillator): CI-verified on Ubuntu with Python 3.11 and 3.13 and on Windows with Python 3.13.
-  - QuTiP two-level Rabi dynamics: verified on Windows with Python 3.13; CI pending.
+  - QuTiP two-level Rabi dynamics: CI-verified on the same three jobs.
 - Twelve other engines are detected and smoke-tested but have no adapter; FEniCSx, PySCF, OpenFOAM and GROMACS are not installed on the development machine.
 - AI-driven tool execution is **not enabled**; only the model-provider protocol and the human-approval boundary exist.
 

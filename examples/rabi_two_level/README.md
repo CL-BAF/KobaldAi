@@ -45,4 +45,5 @@ memory each.
 - The model is a coherent, closed two-level system. It has no decoherence or
   time-dependent drive, and this example validates nothing beyond that case.
 - Bitwise reproducibility is claimed for the same machine and library versions only.
-- Linux results await CI.
+- The example's automated tests pass in CI on Ubuntu (Python 3.11 and 3.13) and Windows
+  (Python 3.13). The accuracy figures above come from the Windows run only.
