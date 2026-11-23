@@ -5,8 +5,14 @@ Evidence captured on 2026-11-23 on the development workstation (Windows 11 Pro
 columns describe that workstation only.
 
 The SciPy adapter's end-to-end tests also pass in GitHub Actions on Ubuntu (Python 3.11
-and 3.13) and Windows (Python 3.13), commit `bd07c04`. CI installs only
-`.[dev,science-core]`, so no other engine row has CI evidence.
+and 3.13) and Windows (Python 3.13), commit `bd07c04`.
+
+The QuTiP adapter (`rabi_two_level`, QuTiP 5.3.1, `qutip.sesolve`) is verified on the
+workstation. Its example run matched the closed-form Rabi solution to at most 2.9e-15
+(threshold 2e-9). An independent `scipy.linalg.expm` propagation, sharing no code with
+Kobald, agreed to at most 3.9e-15 over 601 samples. CI installs `engine-qutip`, and the QuTiP
+tests pass on Ubuntu (Python 3.11 and 3.13) and Windows (Python 3.13), commit `cdec21e`.
+No other engine row has CI evidence.
 
 Re-check any machine with:
 
@@ -33,7 +39,7 @@ python scripts/engine_smoke.py    # imports each engine in an isolated subproces
 | Pint | mathematics | 0.26.2 | yes | pass | used for unit validation | — | **Operational as support library** |
 | SymPy | mathematics | 1.14.0 | yes | pass | no (used in tests to cross-check the reference) | — | Partially integrated |
 | MuJoCo | physics | 4.0.1 | yes | pass | no | no | Detected only |
-| QuTiP | physics | 5.3.1 | yes | pass | no | no | Detected only |
+| QuTiP | physics | 5.3.1 | yes | pass | `rabi_two_level` (two-level system, pure-state `sesolve`) | yes (closed form; CI: Ubuntu 3.11/3.13, Windows 3.13) | **Operational** (one task) |
 | OpenMM | physics | 8.6.1 | yes | pass (Reference platform) | no | no | Detected only |
 | RDKit | chemistry | 2026.9.2 | yes | pass (first import ~15 s) | no | no | Detected only |
 | Cantera | chemistry | 3.2.0 | yes | pass | no | no | Detected only |

@@ -122,6 +122,7 @@ class ScienceEngineRegistry:
 
 def default_registry() -> ScienceEngineRegistry:
     """Registry with every adapter shipped in this package."""
+    from kobald.integrations.science.adapters.qutip_rabi import QutipRabiAdapter
     from kobald.integrations.science.adapters.scipy_ode import ScipyOdeAdapter
 
-    return ScienceEngineRegistry(adapters=[ScipyOdeAdapter()])
+    return ScienceEngineRegistry(adapters=[ScipyOdeAdapter(), QutipRabiAdapter()])

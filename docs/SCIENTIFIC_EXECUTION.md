@@ -111,14 +111,17 @@ the run directory are kept unredacted for local debugging.
 
 Run directories go to `runs/`, which is gitignored.
 
-## First demonstration
+## Demonstrations
 
 ```powershell
 kobald-science run examples/damped_oscillator/spec.json
 ```
 
 See `examples/damped_oscillator/README.md` for the research question and the
-actual results.
+actual results. The second operational engine is QuTiP:
+`kobald-science run examples/rabi_two_level/spec.json` (see
+`examples/rabi_two_level/README.md`). Angular-frequency parameters reject `Hz`/`1/s`
+because Pint would silently drop the factor 2*pi.
 
 ## Adding an engine adapter
 

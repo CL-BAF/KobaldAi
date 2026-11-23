@@ -131,3 +131,23 @@ def test_option_rule_serialisation() -> None:
         "minimum": None,
         "maximum": None,
     }
+
+
+ANGULAR = {"omega": ParameterRule("rad/s", "angular frequency", requires_angle_unit=True)}
+
+
+@pytest.mark.parametrize(
+    ("unit", "expected"),
+    [("rad/s", 2.0), ("Mrad/s", 2e6), ("turn/s", 4 * 3.141592653589793), ("degree/s", 0.0349)],
+)
+def test_angular_frequency_accepts_explicit_angle_units(unit: str, expected: float) -> None:
+    value = normalize_parameters({"omega": QuantitySpec(2.0, unit)}, ANGULAR)["omega"].si_value
+    assert value == pytest.approx(expected, rel=1e-3)
+
+
+@pytest.mark.parametrize("unit", ["Hz", "MHz", "1/s", "kHz*s/s"])
+def test_angular_frequency_rejects_ambiguous_units(unit: str) -> None:
+    """Hz would otherwise silently become rad/s, wrong by 2*pi."""
+    with pytest.raises(UnitValidationError, match=r"2\*pi"):
+        normalize_parameters({"omega": QuantitySpec(1.0, unit)}, ANGULAR)
+    assert ANGULAR["omega"].to_dict()["requires_angle_unit"] is True

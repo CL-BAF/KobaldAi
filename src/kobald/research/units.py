@@ -44,9 +44,14 @@ class ParameterRule:
     minimum: float | None = None
     minimum_inclusive: bool = True
     maximum: float | None = None
+    # Pint treats the radian as dimensionless, so "Hz" or "1/s" would silently
+    # convert to rad/s and be wrong by 2*pi. Angular rules demand an explicit
+    # angle unit (rad, deg, turn, ...) in the submitted unit.
+    requires_angle_unit: bool = False
 
     def to_dict(self) -> dict[str, Any]:
         return {
+            "requires_angle_unit": self.requires_angle_unit,
             "si_unit": self.si_unit,
             "dimension": dimensionality_of(self.si_unit),
             "description": self.description,
@@ -102,6 +107,17 @@ def dimensionality_of(unit: str) -> str:
     return str(_UREG.parse_units(unit).dimensionality)
 
 
+_ANGLE_UNITS = frozenset({"radian", "degree", "turn", "arcminute", "arcsecond", "gradian"})
+
+
+def _has_angle_unit(quantity: pint.Quantity) -> bool:
+    for unit_name, power in quantity.unit_items():
+        for _prefix, base, _suffix in _UREG.parse_unit_name(unit_name):
+            if base in _ANGLE_UNITS and power == 1:
+                return True
+    return False
+
+
 def _parse(name: str, quantity: QuantitySpec) -> pint.Quantity:
     try:
         return _UREG.Quantity(quantity.value, quantity.unit)
@@ -134,6 +150,11 @@ def normalize_parameters(
             raise UnitValidationError(
                 f"{name}: unit {parameters[name].unit!r} has dimension "
                 f"{quantity.dimensionality}, expected {expected.dimensionality}"
+            )
+        if rule.requires_angle_unit and not _has_angle_unit(quantity):
+            raise UnitValidationError(
+                f"{name}: unit {parameters[name].unit!r} has no angle unit; give an angular "
+                f"frequency such as 'rad/s' (Hz and 1/s are ambiguous by a factor of 2*pi)"
             )
         si_value = float(quantity.to(expected).magnitude)
         if not math.isfinite(si_value):
