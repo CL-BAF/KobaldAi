@@ -538,7 +538,7 @@ def test_cli_reports_unloadable_and_unsuccessful_specs(tmp_path: Path) -> None:
 
 def test_build_runner_keeps_model_requests_disabled(tmp_path: Path) -> None:
     runner = build_runner(tmp_path)
-    assert runner._gate.policy.allowed_tasks == TASKS
+    assert runner._gate.policy.allowed_tasks == TASKS | {("qutip", "rabi_two_level")}
     assert runner._gate.policy.allow_model_requests is False
 
 

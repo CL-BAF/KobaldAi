@@ -26,6 +26,7 @@ from kobald.research.spec import ExperimentSpec, SpecError
 from kobald.runtime.sandbox import SubprocessSandbox
 from kobald.runtime.science import ExperimentRunner
 from kobald.supervisor.oscillator import DampedOscillatorVerifier
+from kobald.supervisor.rabi import RabiVerifier
 
 __all__ = ["build_runner", "main"]
 
@@ -42,7 +43,7 @@ def build_runner(
         gate=ScientificExecutionGate(policy),
         backend=SubprocessSandbox(),
         runs_root=runs_root,
-        verifiers=[DampedOscillatorVerifier()],
+        verifiers=[DampedOscillatorVerifier(), RabiVerifier()],
     )
 
 

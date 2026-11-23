@@ -170,7 +170,7 @@ def _imported_modules(path: Path) -> set[str]:
 @pytest.mark.parametrize(
     ("package", "forbidden"),
     [
-        ("supervisor", ("kobald.integrations", "kobald.runtime", "kobald.providers")),
+        ("supervisor", ("kobald.integrations", "kobald.runtime", "kobald.providers", "qutip")),
         ("integrations", ("kobald.supervisor", "kobald.policy", "kobald.providers")),
         ("providers", ("kobald.policy", "kobald.runtime", "kobald.supervisor")),
         ("policy", ("kobald.integrations", "kobald.runtime", "kobald.supervisor")),

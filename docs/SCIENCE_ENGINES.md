@@ -33,7 +33,7 @@ python scripts/engine_smoke.py    # imports each engine in an isolated subproces
 | Pint | mathematics | 0.26.2 | yes | pass | used for unit validation | — | **Operational as support library** |
 | SymPy | mathematics | 1.14.0 | yes | pass | no (used in tests to cross-check the reference) | — | Partially integrated |
 | MuJoCo | physics | 4.0.1 | yes | pass | no | no | Detected only |
-| QuTiP | physics | 5.3.1 | yes | pass | no | no | Detected only |
+| QuTiP | physics | 5.3.1 | yes | pass | `rabi_two_level` | yes (closed form; Windows only, Linux CI pending) | **Operational** |
 | OpenMM | physics | 8.6.1 | yes | pass (Reference platform) | no | no | Detected only |
 | RDKit | chemistry | 2026.9.2 | yes | pass (first import ~15 s) | no | no | Detected only |
 | Cantera | chemistry | 3.2.0 | yes | pass | no | no | Detected only |

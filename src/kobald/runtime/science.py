@@ -21,7 +21,12 @@ from kobald.integrations.science.registry import ScienceEngineRegistry, UnknownE
 from kobald.policy.science import Approval, Decision, Principal, ScientificExecutionGate
 from kobald.research.figures import plot_against_reference
 from kobald.research.hashing import file_sha256, float_array_sha256
-from kobald.research.records import RECORD_SCHEMA_VERSION, capture_environment, write_record
+from kobald.research.records import (
+    RECORD_SCHEMA_VERSION,
+    capture_environment,
+    package_versions,
+    write_record,
+)
 from kobald.research.report import render_report
 from kobald.research.spec import ExperimentSpec, OptionValue, ResourceBudget
 from kobald.research.units import UnitValidationError, normalize_parameters, validate_options
@@ -191,6 +196,9 @@ class ExperimentRunner:
             record["errors"].append({"stage": "validation", "message": str(error)})
             return self._finish(run_dir, record, "invalid", None)
 
+        record["environment"]["packages"].update(
+            package_versions(self._registry.descriptor(spec.engine).distributions)
+        )
         record["parameters"] = {name: p.to_dict() for name, p in parameters.items()}
         record["options"] = options
         if decision.decision is not Decision.ALLOW:

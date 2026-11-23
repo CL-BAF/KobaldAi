@@ -90,7 +90,7 @@ strict = true
 files = ["src", "tests"]
 
 [[tool.mypy.overrides]]
-module = ["scipy.*", "matplotlib.*", "sympy.*"]
+module = ["scipy.*", "matplotlib.*", "sympy.*", "qutip", "qutip.*"]
 ignore_missing_imports = true
 
 # NumPy >= 2.5 and Pint >= 0.26 ship types using Python 3.12-only syntax, which mypy rejects when

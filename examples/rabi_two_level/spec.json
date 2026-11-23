@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "experiment_id": "rabi-two-level-qutip",
+  "question": "Does QuTiP's sesolve (DOP853) reproduce the closed-form Rabi oscillation of a detuned two-level system (Omega = 2 pi x 1 MHz, Delta = 2 pi x 0.25 MHz) over 3 microseconds to within 1e-8 in every population and Bloch component, conserving probability, deterministically, and converging when solver tolerances are tightened?",
+  "engine": "qutip",
+  "task": "rabi_two_level",
+  "parameters": {
+    "rabi_frequency": {"value": 6.283185307179586, "unit": "Mrad/s"},
+    "detuning": {"value": 1.5707963267948966, "unit": "Mrad/s"},
+    "duration": {"value": 3.0, "unit": "us"}
+  },
+  "options": {"method": "dop853", "rtol": 1e-10, "atol": 1e-12, "nsteps": 100000, "n_samples": 601},
+  "seed": 0,
+  "budget": {"wall_time_s": 120.0, "memory_mb": 2048, "max_output_bytes": 20000000},
+  "tolerance": {"rtol": 1e-9, "atol": 1e-9}
+}
