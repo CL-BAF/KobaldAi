@@ -118,6 +118,7 @@ Instrument control and any change to physical equipment must be explicitly autho
 - [Architecture](docs/ARCHITECTURE.md)
 - [Scientific execution framework](docs/SCIENTIFIC_EXECUTION.md)
 - [Scientific engine compatibility matrix](docs/SCIENCE_ENGINES.md)
+- [Sandbox audit and isolated-backend design](docs/SANDBOX.md)
 - [Roadmap](docs/ROADMAP.md)
 - [Migration manifest](docs/MIGRATION.md)
 - [Security model](docs/SECURITY.md)

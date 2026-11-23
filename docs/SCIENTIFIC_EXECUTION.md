@@ -23,7 +23,7 @@ ExperimentSpec (JSON, untrusted)          kobald.research.spec
 Every path ends with a persisted record and report, including invalid input, denial,
 awaiting approval, engine failure, tampered output and failed verification. The
 terminal statuses are `invalid`, `denied`, `awaiting_approval`, `failed`, `completed`
-and `completed_verification_failed`.
+and `completed_verification_failed`. Non-final statuses are `running` and `interrupted`.
 
 ## Module responsibilities
 
@@ -45,39 +45,63 @@ with an AST scan.
 
 ## Security properties (and their limits)
 
-- **Deny by default:** only allow-listed `(engine, task)` pairs run. Budgets above
-  policy caps are denied.
-- **Models cannot authorise:** requests from a `PrincipalKind.MODEL` principal return
-  `awaiting_approval` unless they carry an approval. `grant()` refuses non-human
-  approvers. An approval is bound to the spec digest and an expiry, and is
-  HMAC-authenticated with a per-gate random key, so a forged or replayed approval
-  is rejected.
+- **Deny by default:** only allow-listed `(engine, task)` pairs within policy caps run.
+- **Model-initiated execution is disabled.** A request from a `PrincipalKind.MODEL`
+  principal is denied unless the policy sets `allow_model_requests=True`, which
+  nothing in the product does; only the approval-boundary tests do.
+- **Approval mechanism (for when model requests are enabled).** An approval is
+  bound to the exact spec digest and an expiry. It is **single-use**, and it carries
+  an HMAC-SHA256 made with a per-gate random key. Anything that is not a
+  gate-issued `Approval` object fails closed, including model-emitted JSON.
+- **Trust assumptions — what the approval HMAC does NOT give you:**
+  - It defends only against forgery through *data channels*, such as a model
+    emitting text or JSON.
+  - It does **not** authenticate humans. `grant()` trusts a self-declared
+    `PrincipalKind.HUMAN`, and any code in the same Python process can call it or
+    read the key. This is pinned by a strict-xfail test that must flip when WARDEN
+    provides real authentication.
+  - Approvals live in memory only and do not survive a restart.
+  - The earlier statement that approvals "cannot be forged" was overstated. It holds
+    only under the data-channel assumption above.
 - **Models cannot verify:** verification reports come only from supervisor verifiers.
   The report renders the verdict from the record and never upgrades it. Tasks without
   a registered reference are explicitly `NOT VERIFIED`.
-- **Sandbox — enforced:** separate `python -I` process, dedicated working directory,
-  scrubbed environment (API keys and user variables are not inherited), wall-clock
-  kill, output-size cap, single-threaded BLAS/OpenMP.
-- **Budget scope:** the spec's resource budget applies **per execution**. A verified
-  task runs three executions (primary, replicate, refined), so it can use up to 3× the
-  stated wall time.
-- **Sandbox — enforced only on POSIX:** memory (`RLIMIT_AS`) and CPU-time rlimits.
-- **Sandbox — not enforced:** network isolation, filesystem confinement, and memory
-  limits on Windows. Every record states these flags (`memory_limit_enforced`,
-  `network_isolated`, `filesystem_confined`). A Windows Job Object backend or a
-  WSL2/container backend is the next hardening step.
+- **Total experiment budget:** wall time and output bytes are shared across all
+  executions of an experiment (primary, replicate, refined). Spawn, termination and
+  reaping all count. If the budget runs out before a verification run, the experiment
+  ends `failed` at stage `budget:<role>`; verification is never silently skipped.
+  Memory is a per-process limit.
+- **Sandbox:** see [SANDBOX.md](SANDBOX.md) for the per-platform audit. In short:
+  - **Enforced:** environment scrubbing, process-tree control, a wall-clock limit,
+    and a memory cap (a Windows Job Object; `RLIMIT_AS` on POSIX).
+  - **Not enforced:** network isolation, filesystem confinement and privilege
+    reduction.
 
 The gate is a narrow precursor and **not** the WARDEN migration. WARDEN will wrap or
-replace it in its own reviewable change (see `MIGRATION.md`). AI-driven execution
-(a model submitting specs through a tool loop) is **not enabled**. Only the provider
-protocol and the approval boundary exist.
+replace it in its own reviewable change; see `MIGRATION.md` and
+`docs/migration/`. AI-driven execution is **not enabled**.
+
+## Interrupted and failed runs
+
+- `record.json` is written as soon as the run directory exists, with status
+  `running`. It is rewritten at every terminal state. A hard kill leaves an honest
+  `running` record behind.
+- On `KeyboardInterrupt` or any other exception, the record becomes `interrupted`,
+  the report is written, and the exception propagates.
+- Records and digests are written atomically: a temporary file, then `fsync`, then
+  `os.replace`.
+- `kobald-science verify-record RUN_DIR` independently re-checks a run:
+  - `record.json` against `record.sha256`;
+  - every artifact and output table against its recorded hash;
+  - non-final statuses (`running`, `interrupted`) are flagged as incomplete.
 
 ## Reproducibility record
 
 `record.json` contains the original spec and its digest; the policy decision and
 any approval; SI-normalised parameters with original units and dimensions; resolved
 options; the seed; engine id, adapter class and version; Python, platform and
-package versions; sandbox limits actually applied; per-execution diagnostics; and
+package versions; the requester; the total budget and what was used; per-execution
+allowances, sandbox limits actually applied, peak memory and diagnostics; and
 SHA-256 hashes of output columns (packed little-endian float64), of the CSV table,
 the figure and the report. `input_datasets` is present but empty, because the demo
 has no input data. Hostnames are not collected. Local path prefixes (the run

@@ -70,7 +70,7 @@ execution backend**, not Windows workarounds:
 2. Inside WSL2, create a dedicated environment, e.g.
    `conda create -n kobald-linux -c conda-forge fenics-dolfinx pyscf`, or install
    OpenFOAM/GROMACS from their distribution packages.
-3. Implement a `WslBackend` (or container backend) behind the existing
+3. Implement the isolated Linux worker backend designed in [SANDBOX.md](SANDBOX.md) behind the existing
    `kobald.runtime.sandbox.ExecutionBackend` protocol so jobs and results cross the
    boundary as `job.json` / `result.json` exactly as with the local subprocess backend.
 
