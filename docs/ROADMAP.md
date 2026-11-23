@@ -58,8 +58,8 @@ and tests for rejection/failure paths.
 
 ## Phase 5: Scientific research and evaluation system
 
-- [ ] Reproducible scientific job specification: inputs, units, methods, versions, seeds and budgets
-- [ ] Sandboxed simulation runner and independently testable result capture
+- [x] Reproducible scientific job specification: inputs, units, methods, versions, seeds and budgets (milestone 1)
+- [ ] Sandboxed simulation runner and independently testable result capture — local subprocess runner done; network/filesystem isolation and the WSL2/container backend outstanding
 - [ ] Read-only chemistry/data-analysis adapter with a small openly documented test dataset
 - [ ] Real research-task execution backend
 - [ ] Raw and scored trajectory stores
@@ -83,7 +83,7 @@ and tests for rejection/failure paths.
 
 These milestones may run across multiple releases after the core runtime and security boundaries exist:
 
-1. **First reproducible dry-lab demonstration:** use a documented physics or numerical simulation and independently check outputs against known results.
+1. **First reproducible dry-lab demonstration:** use a documented physics or numerical simulation and independently check outputs against known results. *Done for the SciPy damped-oscillator task (examples/damped_oscillator).*
 2. **Computational chemistry demonstration:** analyse existing chemical data without controlling a physical instrument.
 3. **Instrument interoperability:** define typed connectors and replayable synthetic instrument messages, then trial read-only hardware measurements with appropriate supervision.
 4. **Research workflows:** compose analyses, maintain data and method lineage, quantify uncertainty and enable human comparison of experimental runs.
