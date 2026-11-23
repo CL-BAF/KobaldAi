@@ -19,7 +19,15 @@ from kobald.integrations.science.base import AdapterResult
 from kobald.integrations.science.registry import ScienceEngineRegistry, default_registry
 from kobald.research.hashing import float_array_sha256
 
-__all__ = ["JOB_FILE", "RESULT_FILE", "TABLE_FILE", "execute_job", "main", "write_table"]
+__all__ = [
+    "JOB_FILE",
+    "RESULT_FILE",
+    "TABLE_FILE",
+    "execute_job",
+    "main",
+    "resource_usage",
+    "write_table",
+]
 
 JOB_FILE = "job.json"
 RESULT_FILE = "result.json"
@@ -44,6 +52,24 @@ def write_table(path: Path, result: AdapterResult) -> list[dict[str, Any]]:
     ]
 
 
+def resource_usage(status_path: Path = Path("/proc/self/status")) -> dict[str, int]:
+    """Peak virtual (VmPeak) and resident (VmHWM) memory in kB, where the OS exposes it.
+
+    Linux provides ``/proc/self/status``; elsewhere this returns ``{}`` and the
+    parent records what its own limit mechanism observed instead.
+    """
+    usage: dict[str, int] = {}
+    try:
+        lines = status_path.read_text(encoding="utf-8").splitlines()
+    except OSError:
+        return usage
+    for line in lines:
+        key, _, value = line.partition(":")
+        if key in ("VmPeak", "VmHWM") and value.strip().endswith("kB"):
+            usage[f"{key.lower()}_kb"] = int(value.split()[0])
+    return usage
+
+
 def execute_job(workdir: Path, registry: ScienceEngineRegistry | None = None) -> int:
     """Run the job in ``workdir``; always writes ``result.json``. Returns an exit code."""
     result_path = workdir / RESULT_FILE
@@ -60,6 +86,7 @@ def execute_job(workdir: Path, registry: ScienceEngineRegistry | None = None) ->
             "scalars": {k: {"value": v, "unit": u} for k, (v, u) in result.scalars.items()},
             "diagnostics": dict(result.diagnostics),
             "warnings": list(result.warnings),
+            "resource_usage": resource_usage(),
         }
         code = 0
     except Exception as error:  # report every engine failure as structured data

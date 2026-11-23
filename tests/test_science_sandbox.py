@@ -174,3 +174,12 @@ def test_directory_size_counts_nested_files(tmp_path: Path) -> None:
 def test_limits_report_posix_memory_enforcement() -> None:
     assert SubprocessSandbox(posix=True).limits(BUDGET).memory_limit_enforced is True
     assert SubprocessSandbox(posix=False).limits(BUDGET).memory_limit_enforced is False
+
+
+def test_resource_usage_parses_proc_status(tmp_path: Path) -> None:
+    from kobald.runtime.science_worker import resource_usage
+
+    status = tmp_path / "status"
+    status.write_text("Name:\tpython\nVmPeak:\t  412345 kB\nVmHWM:\t   98765 kB\nThreads:\t1\n")
+    assert resource_usage(status) == {"vmpeak_kb": 412345, "vmhwm_kb": 98765}
+    assert resource_usage(tmp_path / "missing") == {}
