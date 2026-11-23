@@ -14,8 +14,10 @@ This is the canonical successor to the legacy [`CL-BAF/Kobald`](https://github.c
 
 **v0.1 foundation bootstrap plus a first scientific-execution slice (feature branch).**
 
-- One engine path is operational end-to-end (CI-verified on Ubuntu with Python 3.11 and 3.13 and on Windows with Python 3.13): SciPy ODE integration with Pint unit validation, a deny-by-default execution gate, a subprocess sandbox, independent closed-form verification, reproducible records and reports. See [scientific execution](docs/SCIENTIFIC_EXECUTION.md) and the [engine compatibility matrix](docs/SCIENCE_ENGINES.md).
-- Thirteen other engines are detected and smoke-tested but have no adapter; FEniCSx, PySCF, OpenFOAM and GROMACS are not installed on the development machine.
+- Two engine paths are operational end-to-end. Both use Pint unit validation, a deny-by-default execution gate, a subprocess sandbox, independent closed-form verification, reproducible records and reports. See [scientific execution](docs/SCIENTIFIC_EXECUTION.md) and the [engine compatibility matrix](docs/SCIENCE_ENGINES.md).
+  - SciPy ODE integration (damped oscillator): CI-verified on Ubuntu with Python 3.11 and 3.13 and on Windows with Python 3.13.
+  - QuTiP two-level Rabi dynamics: verified on Windows with Python 3.13; CI pending.
+- Twelve other engines are detected and smoke-tested but have no adapter; FEniCSx, PySCF, OpenFOAM and GROMACS are not installed on the development machine.
 - AI-driven tool execution is **not enabled**; only the model-provider protocol and the human-approval boundary exist.
 
 - Package and domain boundaries, architecture, roadmap, security and migration decisions are documented.
@@ -95,7 +97,7 @@ Research question / hypothesis
 
 | Area | Intended capability | Status |
 |---|---|---|
-| Physics and engineering | Invoke simulation engines and analyse results | Proposed; no integration |
+| Physics and engineering | Invoke simulation engines and analyse results | QuTiP two-level Rabi adapter operational and verified against a closed form (Windows; Linux CI pending) |
 | Chemistry | Use chemical datasets and computational analysis tools | Proposed; no integration |
 | Instruments and sensors | Read measurements through authenticated, documented connectors | Proposed; no live connector |
 | Mathematics and data science | Reproducible computations and statistical analysis | First SciPy adapter operational and verified against a closed form |
