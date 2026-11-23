@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "kobald-ai"
 version = "0.1.0.dev0"
-description = "Local AI and smart-systems runtime with evidence, policy and auditable tool use"
+description = "Evidence-first AI harness for reproducible scientific investigation"
 readme = "README.md"
 requires-python = ">=3.11"
 authors = [{ name = "Cameron Lonnie" }]
@@ -19,12 +19,41 @@ classifiers = [
 dependencies = []
 
 [project.optional-dependencies]
+# Framework core needed by the scientific execution layer and its first adapter.
+science-core = [
+    "numpy>=1.26",
+    "scipy>=1.11",
+    "pint>=0.23",
+    "matplotlib>=3.8",
+]
+# One extra per engine so users install only what they need. Engines other
+# than SciPy are detected but have no adapter yet (see docs/SCIENCE_ENGINES.md).
+engine-numpy = ["numpy>=1.26"]
+engine-scipy = ["scipy>=1.11"]
+engine-sympy = ["sympy>=1.12"]
+engine-pint = ["pint>=0.23"]
+engine-mujoco = ["mujoco>=3.0"]
+engine-qutip = ["qutip>=5.0"]
+engine-openmm = ["openmm>=8.1"]
+engine-rdkit = ["rdkit>=2024.3"]
+engine-cantera = ["cantera>=3.0"]
+engine-ase = ["ase>=3.23"]
+engine-pybamm = ["pybamm>=24.1"]
+engine-biopython = ["biopython>=1.83"]
+engine-cobra = ["cobra>=0.29"]
+engine-astropy = ["astropy>=6.0"]
+# Linux/WSL2 only (no supported Windows wheels): install inside the isolated env.
+engine-pyscf = ["pyscf>=2.5; platform_system != 'Windows'"]
+# FEniCSx (fenics-dolfinx) is distributed via conda-forge/apt, not PyPI; see docs.
 dev = [
     "mypy>=1.17,<2",
     "pytest>=8.4,<9",
     "pytest-cov>=6.2,<8",
     "ruff>=0.12,<1",
 ]
+
+[project.scripts]
+kobald-science = "kobald.runtime.cli:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/kobald"]
@@ -37,6 +66,12 @@ testpaths = ["tests"]
 branch = true
 source = ["kobald"]
 
+[tool.coverage.report]
+exclude_also = [
+    'if __name__ == "__main__":',
+    '^\s*\.\.\.$',  # Protocol method bodies
+]
+
 [tool.ruff]
 line-length = 100
 target-version = "py311"
@@ -48,3 +83,14 @@ select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
 python_version = "3.11"
 strict = true
 files = ["src", "tests"]
+
+[[tool.mypy.overrides]]
+module = ["scipy.*", "matplotlib.*", "sympy.*"]
+ignore_missing_imports = true
+
+# NumPy >= 2.5 and Pint >= 0.26 ship types using Python 3.12-only syntax, which mypy rejects when
+# checking for the project's 3.11 floor. Treat them as untyped instead.
+[[tool.mypy.overrides]]
+module = ["numpy", "numpy.*", "pint", "pint.*"]
+follow_imports = "skip"
+follow_imports_for_stubs = true
