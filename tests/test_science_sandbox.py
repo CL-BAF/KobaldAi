@@ -362,3 +362,11 @@ def test_tail_of_missing_file_is_empty(tmp_path: Path) -> None:
     from kobald.runtime.sandbox import _tail
 
     assert _tail(tmp_path / "missing.log") == ""
+
+
+def test_winjob_module_imports_on_every_platform() -> None:
+    """The Windows-only API is guarded; the module itself must import everywhere."""
+    from kobald.runtime import winjob
+
+    assert issubclass(winjob.JobObjectError, OSError)
+    assert hasattr(winjob, "WindowsJob") is WINDOWS
