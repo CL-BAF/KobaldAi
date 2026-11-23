@@ -2,6 +2,7 @@
 
 ``kobald-science engines`` lists detected engines and adapters.
 ``kobald-science run SPEC.json`` runs an experiment as the local human operator.
+``kobald-science verify-record RUN_DIR`` re-checks a run's record and artifact hashes.
 """
 
 from __future__ import annotations
@@ -20,6 +21,7 @@ from kobald.policy.science import (
     ScientificExecutionGate,
     ScientificExecutionPolicy,
 )
+from kobald.research.records import verify_record
 from kobald.research.spec import ExperimentSpec, SpecError
 from kobald.runtime.sandbox import SubprocessSandbox
 from kobald.runtime.science import ExperimentRunner
@@ -87,7 +89,19 @@ def main(argv: Sequence[str] | None = None, out: TextIO = sys.stdout) -> int:
     run = sub.add_parser("run", help="run an experiment spec as the local operator")
     run.add_argument("spec", type=Path)
     run.add_argument("--runs-dir", type=Path, default=Path("runs"))
+    check = sub.add_parser("verify-record", help="re-check a run directory's hashes")
+    check.add_argument("run_dir", type=Path)
     args = parser.parse_args(argv)
     if args.command == "engines":
         return _engines(out, args.json)
+    if args.command == "verify-record":
+        return _verify(out, args.run_dir)
     return _run(out, args.spec, args.runs_dir)
+
+
+def _verify(out: TextIO, run_dir: Path) -> int:
+    problems = verify_record(run_dir)
+    for problem in problems:
+        out.write(f"problem: {problem}\n")
+    out.write("record verified\n" if not problems else f"{len(problems)} problem(s)\n")
+    return 0 if not problems else 1

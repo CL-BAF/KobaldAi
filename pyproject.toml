@@ -71,6 +71,10 @@ source = ["kobald"]
 exclude_also = [
     'if __name__ == "__main__":',
     '^\s*\.\.\.$',  # Protocol method bodies
+    # Platform-specific code: excluded from the single-platform gate, exercised by
+    # platform-gated tests on the Ubuntu and Windows CI jobs.
+    'pragma: windows-only',
+    'pragma: posix-only',
 ]
 
 [tool.ruff]

@@ -37,11 +37,15 @@ def render_report(record: dict[str, Any], figure: str | None) -> str:
         "",
         spec["question"],
         "",
-        "## Policy decision",
-        "",
-        f"{record['policy']['decision']} — " + "; ".join(record["policy"]["reasons"]),
-        "",
     ]
+    policy = record.get("policy")
+    if policy is not None:
+        lines += [
+            "## Policy decision",
+            "",
+            f"{policy['decision']} — " + "; ".join(policy["reasons"]),
+            "",
+        ]
 
     if record.get("parameters"):
         lines += [
@@ -108,6 +112,7 @@ def render_report(record: dict[str, Any], figure: str | None) -> str:
             )
         lines.append("")
         limits = record["executions"][0]["sandbox"]["limits"]
+        budget = record.get("budget", {})
         lines += [
             "## Reproducibility and limitations",
             "",
@@ -115,11 +120,15 @@ def render_report(record: dict[str, Any], figure: str | None) -> str:
             "- Package versions: "
             + ", ".join(f"{k} {v}" for k, v in record["environment"]["packages"].items()),
             f"- Seed: {spec['seed']} (recorded; deterministic engines do not consume it).",
-            f"- Sandbox backend `{limits['backend']}`: "
-            f"wall-time limit {limits['wall_time_s']} s enforced; "
-            f"memory limit enforced: {limits['memory_limit_enforced']}; "
+            f"- Experiment budget ({budget.get('scope', 'unknown')}): "
+            f"{budget.get('wall_time_s')} s wall time across all executions, "
+            f"{_fmt(budget.get('wall_time_used_s', 0.0))} s used.",
+            f"- Sandbox `{limits['backend']}` / `{limits['controller']}`: "
+            f"process tree controlled: {limits['process_tree_controlled']}; "
+            f"memory limit: {limits['memory_limit_kind'] or 'not enforced'}; "
             f"network isolated: {limits['network_isolated']}; "
-            f"filesystem confined: {limits['filesystem_confined']}.",
+            f"filesystem confined: {limits['filesystem_confined']}; "
+            f"privileges reduced: {limits['privileges_reduced']}.",
             "- Output column hashes are SHA-256 of little-endian float64 values (see record.json).",
             "",
         ]

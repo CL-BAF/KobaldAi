@@ -1,16 +1,28 @@
 """Scientific execution gate.
 
-This is a narrow, deny-by-default gate for *computational* experiments only.
-It is **not** the WARDEN migration (tracked separately in docs/MIGRATION.md);
-WARDEN will later subsume or wrap it.
+A narrow, deny-by-default gate for *computational* experiments only. It is
+**not** the WARDEN migration (tracked separately in docs/MIGRATION.md); WARDEN
+must later wrap or replace it.
 
-Guarantees:
+What it enforces:
 
-* Only allow-listed ``(engine, task)`` pairs can run.
-* Requested resource budgets must fit within policy caps.
-* Requests from a model principal require an approval granted by a human
-  principal, bound to the exact spec digest and an expiry, and authenticated
-  with a per-gate secret so that a model cannot forge one.
+* Only allow-listed ``(engine, task)`` pairs within policy budget caps run.
+* Requests from a ``MODEL`` principal are denied outright unless the policy
+  explicitly enables model requests (off by default). When enabled, they need
+  an approval that is bound to the exact spec digest, expires, is single-use,
+  and carries an HMAC made with a per-gate random key.
+
+Trust assumptions (what the HMAC does and does not prove):
+
+* It stops forgery through **data channels**: a model that can only emit text
+  or JSON cannot produce an :class:`Approval` the gate accepts, because it never
+  sees the key and the gate accepts only gate-issued ``Approval`` objects.
+* It does **not** authenticate humans. :meth:`ScientificExecutionGate.grant`
+  trusts the caller's claim that the approver is a human. Any code running in
+  the same Python process can call ``grant`` with a self-declared human
+  principal or read the key. Real human authentication and out-of-process
+  authority are WARDEN's job and are not implemented here.
+* The key lives only in memory, so approvals do not survive a restart.
 """
 
 from __future__ import annotations
@@ -104,6 +116,9 @@ class ScientificExecutionPolicy:
     max_memory_mb: int = 4096
     max_output_bytes: int = 200_000_000
     max_approval_ttl: timedelta = field(default=timedelta(hours=1))
+    # Model-initiated execution stays disabled until WARDEN/AUDITOR and stronger
+    # confinement exist. Only tests of the approval boundary enable it.
+    allow_model_requests: bool = False
 
 
 class ScientificExecutionGate:
@@ -112,6 +127,7 @@ class ScientificExecutionGate:
     def __init__(self, policy: ScientificExecutionPolicy) -> None:
         self._policy = policy
         self._key = secrets.token_bytes(32)
+        self._consumed: set[str] = set()
 
     @property
     def policy(self) -> ScientificExecutionPolicy:
@@ -133,18 +149,27 @@ class ScientificExecutionGate:
             raise ApprovalError("only a human principal can approve scientific execution")
         if ttl <= timedelta(0) or ttl > self._policy.max_approval_ttl:
             raise ApprovalError("approval lifetime is outside the permitted range")
+        if now is not None and now.tzinfo is None:
+            raise ApprovalError("approval time must be timezone-aware")
         expires_at = (now or datetime.now(UTC)) + ttl
         digest = spec.digest()
         return Approval(digest, approver, expires_at, self._mac(digest, approver, expires_at))
 
-    def _approval_problem(self, approval: Approval, digest: str, now: datetime) -> str | None:
-        expected = self._mac(approval.spec_digest, approval.approver, approval.expires_at)
-        if not hmac.compare_digest(expected, approval.mac):
+    def _approval_problem(self, approval: object, digest: str, now: datetime) -> str | None:
+        if not isinstance(approval, Approval):
+            return "approval is not a gate-issued Approval object"
+        try:
+            expected = self._mac(approval.spec_digest, approval.approver, approval.expires_at)
+        except (AttributeError, TypeError, ValueError):
+            return "approval is malformed"
+        if not hmac.compare_digest(expected, str(approval.mac)):
             return "approval is not authentic"
         if approval.approver.kind is not PrincipalKind.HUMAN:
             return "approval was not granted by a human"
         if approval.spec_digest != digest:
             return "approval is bound to a different experiment spec"
+        if approval.mac in self._consumed:
+            return "approval has already been used"
         if now >= approval.expires_at:
             return "approval has expired"
         return None
@@ -156,7 +181,15 @@ class ScientificExecutionGate:
         approval: Approval | None = None,
         now: datetime | None = None,
     ) -> PolicyDecision:
+        """Decide on a request. An ALLOW that used an approval consumes it."""
         digest = spec.digest()
+
+        def deny(*reasons: str) -> PolicyDecision:
+            return PolicyDecision(Decision.DENY, reasons, digest, requester)
+
+        if now is not None and now.tzinfo is None:
+            return deny("evaluation time must be timezone-aware")
+        now = now or datetime.now(UTC)
         reasons: list[str] = []
         if (spec.engine, spec.task) not in self._policy.allowed_tasks:
             reasons.append(f"engine task {spec.engine}/{spec.task} is not allow-listed")
@@ -167,7 +200,7 @@ class ScientificExecutionGate:
         if spec.budget.max_output_bytes > self._policy.max_output_bytes:
             reasons.append("requested output size exceeds policy cap")
         if reasons:
-            return PolicyDecision(Decision.DENY, tuple(reasons), digest, requester)
+            return deny(*reasons)
 
         if requester.kind is PrincipalKind.HUMAN:
             return PolicyDecision(
@@ -176,6 +209,8 @@ class ScientificExecutionGate:
                 digest,
                 requester,
             )
+        if not self._policy.allow_model_requests:
+            return deny("model-initiated execution is disabled by policy")
         if approval is None:
             return PolicyDecision(
                 Decision.REQUIRE_APPROVAL,
@@ -183,11 +218,12 @@ class ScientificExecutionGate:
                 digest,
                 requester,
             )
-        problem = self._approval_problem(approval, digest, now or datetime.now(UTC))
+        problem = self._approval_problem(approval, digest, now)
         if problem is not None:
-            return PolicyDecision(Decision.DENY, (problem,), digest, requester)
+            return deny(problem)
+        self._consumed.add(approval.mac)
         until = approval.expires_at.isoformat()
-        reason = f"approved by {approval.approver.identifier} until {until}"
+        reason = f"approved by {approval.approver.identifier} until {until} (now consumed)"
         return PolicyDecision(Decision.ALLOW, (reason,), digest, requester)
 
 
