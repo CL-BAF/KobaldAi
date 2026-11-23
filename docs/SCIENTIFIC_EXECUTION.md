@@ -58,6 +58,9 @@ with an AST scan.
 - **Sandbox — enforced:** separate `python -I` process, dedicated working directory,
   scrubbed environment (API keys and user variables are not inherited), wall-clock
   kill, output-size cap, single-threaded BLAS/OpenMP.
+- **Budget scope:** the spec's resource budget applies **per execution**. A verified
+  task runs three executions (primary, replicate, refined), so it can use up to 3× the
+  stated wall time.
 - **Sandbox — enforced only on POSIX:** memory (`RLIMIT_AS`) and CPU-time rlimits.
 - **Sandbox — not enforced:** network isolation, filesystem confinement, and memory
   limits on Windows. Every record states these flags (`memory_limit_enforced`,
@@ -77,7 +80,10 @@ options; the seed; engine id, adapter class and version; Python, platform and
 package versions; sandbox limits actually applied; per-execution diagnostics; and
 SHA-256 hashes of output columns (packed little-endian float64), of the CSV table,
 the figure and the report. `input_datasets` is present but empty, because the demo
-has no input data. Hostnames, usernames and absolute paths are excluded.
+has no input data. Hostnames are not collected. Local path prefixes (the run
+directory, the Python installation and the home directory) are redacted from every
+string in the record, including failure tracebacks. Raw `exec-*/stderr.log` files in
+the run directory are kept unredacted for local debugging.
 
 Run directories go to `runs/`, which is gitignored.
 

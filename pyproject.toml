@@ -50,6 +50,7 @@ dev = [
     "pytest>=8.4,<9",
     "pytest-cov>=6.2,<8",
     "ruff>=0.12,<1",
+    "sympy>=1.12",  # symbolic cross-check of verifier reference solutions
 ]
 
 [project.scripts]

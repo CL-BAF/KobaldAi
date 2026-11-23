@@ -69,6 +69,7 @@ def _py(
     *,
     linux: bool = False,
     notes: str = "",
+    extra: bool = True,
 ) -> EngineDescriptor:
     return EngineDescriptor(
         engine_id=engine_id,
@@ -77,7 +78,7 @@ def _py(
         kind=EngineKind.PYTHON,
         distributions=distributions,
         import_name=import_name,
-        install_extra=f"engine-{engine_id}",
+        install_extra=f"engine-{engine_id}" if extra else None,
         needs_isolated_linux_env=linux,
         notes=notes,
     )
@@ -98,6 +99,7 @@ ENGINE_CATALOG: tuple[EngineDescriptor, ...] = (
         "dolfinx",
         linux=True,
         notes="No native Windows build; install via conda-forge in WSL2/Linux.",
+        extra=False,
     ),
     _py("openmm", "OpenMM", "physics", ("openmm",), "openmm"),
     _py("rdkit", "RDKit", "chemistry", ("rdkit", "rdkit-pypi"), "rdkit"),

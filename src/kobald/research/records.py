@@ -3,8 +3,10 @@
 A record is a plain JSON document written once per experiment run. It stores
 what was asked, what was approved, exactly what ran (engine and dependency
 versions, SI parameters, options, seed, sandbox limits), output hashes and the
-independent verification verdict. Hostnames, usernames and absolute paths are
-deliberately excluded.
+independent verification verdict. Hostnames are never collected, and local
+path prefixes (run directory, Python installation, home directory) are redacted
+from every string before the record is written, including error tracebacks.
+Raw ``stderr.log`` files inside the run directory are not redacted.
 """
 
 from __future__ import annotations

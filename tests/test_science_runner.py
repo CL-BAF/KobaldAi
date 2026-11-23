@@ -329,3 +329,39 @@ def test_any_model_can_implement_the_provider_protocol() -> None:
     assert isinstance(provider, ModelProvider)
     reply = provider.complete([Message("user", "hello")], max_tokens=3)
     assert reply.content == "hel" and reply.identity.model == "echo"
+
+
+def test_failure_records_redact_local_paths(tmp_path: Path, make_spec: SpecFactory) -> None:
+    import sys
+
+    leaky = f"Traceback: File {Path.home() / 'x.py'} in {Path(sys.prefix) / 'lib'} at {tmp_path}"
+
+    class LeakyBackend(InProcessBackend):
+        def execute(
+            self, job: Mapping[str, Any], workdir: Path, budget: ResourceBudget
+        ) -> SandboxOutcome:
+            workdir.mkdir(parents=True)
+            limits = SubprocessSandbox(posix=False).limits(budget)
+            result = {"status": "error", "message": leaky, "traceback": [leaky, 3]}
+            return SandboxOutcome(
+                SandboxStatus.ENGINE_ERROR, 2, 0.0, workdir, result, leaky, limits
+            )
+
+    result = _runner(tmp_path, backend=LeakyBackend()).run(make_spec(), HUMAN)
+    assert result.status == "failed"
+    saved = (result.run_dir / "record.json").read_text(encoding="utf-8")
+    report = (result.run_dir / "report.md").read_text(encoding="utf-8")
+    for text in (saved, report):
+        assert str(Path.home()) not in text
+        assert json.dumps(str(Path.home()))[1:-1] not in text
+    assert "<home>" in saved or "<run_dir>" in saved
+
+
+def test_redact_paths_handles_nested_values() -> None:
+    from kobald.runtime.science import redact_paths
+
+    data = {"a": ["/home/u/x", 1, {"b": "/home/u"}], "c": None}
+    assert redact_paths(data, [("/home/u", "<home>")]) == {
+        "a": ["<home>/x", 1, {"b": "<home>"}],
+        "c": None,
+    }

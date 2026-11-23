@@ -8,7 +8,8 @@ from __future__ import annotations
 
 import csv
 import secrets
-from collections.abc import Callable, Iterable, Mapping
+import sys
+from collections.abc import Callable, Iterable, Mapping, Sequence
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
@@ -31,7 +32,7 @@ from kobald.supervisor.verification import (
     not_verifiable,
 )
 
-__all__ = ["ExperimentRunner", "OutputIntegrityError", "RunResult", "load_table"]
+__all__ = ["ExperimentRunner", "OutputIntegrityError", "RunResult", "load_table", "redact_paths"]
 
 _ENVIRONMENT_PACKAGES = ("kobald-ai", "numpy", "scipy", "pint", "matplotlib")
 
@@ -68,6 +69,33 @@ def load_table(workdir: Path, result: Mapping[str, Any]) -> tuple[RunArrays, dic
             raise OutputIntegrityError(f"column {column['name']} does not match its hash")
         arrays[column["name"]] = tuple(values)
     return arrays, {c["name"]: c["unit"] for c in declared}
+
+
+def redact_paths(value: Any, replacements: Sequence[tuple[str, str]]) -> Any:
+    """Recursively replace local path prefixes in every string of a record."""
+    if isinstance(value, str):
+        for needle, placeholder in replacements:
+            value = value.replace(needle, placeholder)
+        return value
+    if isinstance(value, dict):
+        return {key: redact_paths(item, replacements) for key, item in value.items()}
+    if isinstance(value, list):
+        return [redact_paths(item, replacements) for item in value]
+    return value
+
+
+def _path_replacements(run_dir: Path) -> list[tuple[str, str]]:
+    pairs: list[tuple[str, str]] = []
+    for path, placeholder in (
+        (run_dir.resolve(), "<run_dir>"),
+        (Path(sys.prefix), "<python_prefix>"),
+        (Path(sys.base_prefix), "<python_base_prefix>"),
+        (Path.home(), "<home>"),
+    ):
+        for form in {str(path), path.as_posix()}:
+            pairs.append((form, placeholder))
+    # Longest first so the most specific prefix wins.
+    return sorted(pairs, key=lambda pair: len(pair[0]), reverse=True)
 
 
 def _utc_stamp(moment: datetime) -> str:
@@ -231,6 +259,8 @@ class ExperimentRunner:
         self, run_dir: Path, record: dict[str, Any], status: str, figure: str | None
     ) -> RunResult:
         record["status"] = status
+        # Tracebacks and stderr can contain usernames and install paths; never persist them.
+        record = redact_paths(record, _path_replacements(run_dir))
         artifacts: dict[str, str] = {}
         if figure is not None:
             artifacts[figure] = file_sha256(run_dir / figure)

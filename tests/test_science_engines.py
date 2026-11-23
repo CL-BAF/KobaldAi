@@ -42,7 +42,7 @@ def test_catalogue_covers_every_requested_engine_once() -> None:
     for descriptor in ENGINE_CATALOG:
         if descriptor.kind is EngineKind.PYTHON:
             assert descriptor.import_name and descriptor.distributions
-            assert descriptor.install_extra == f"engine-{descriptor.engine_id}"
+            assert descriptor.install_extra in (f"engine-{descriptor.engine_id}", None)
         else:
             assert descriptor.executables and descriptor.needs_isolated_linux_env
 
@@ -201,3 +201,18 @@ def test_scipy_adapter_reports_solver_failure(monkeypatch: pytest.MonkeyPatch) -
     monkeypatch.setattr(scipy.integrate, "solve_ivp", failing)
     with pytest.raises(AdapterError, match="step size too small"):
         ScipyOdeAdapter().run("damped_harmonic_oscillator", SI, OPTIONS, None)
+
+
+def test_every_advertised_install_extra_exists() -> None:
+    import tomllib
+    from pathlib import Path
+
+    pyproject = Path(__file__).parents[1] / "pyproject.toml"
+    extras = tomllib.loads(pyproject.read_text(encoding="utf-8"))["project"][
+        "optional-dependencies"
+    ]
+    for descriptor in ENGINE_CATALOG:
+        if descriptor.install_extra is not None:
+            assert descriptor.install_extra in extras, descriptor.engine_id
+    fenicsx = next(d for d in ENGINE_CATALOG if d.engine_id == "fenicsx")
+    assert fenicsx.install_extra is None
