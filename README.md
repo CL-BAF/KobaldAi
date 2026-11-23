@@ -14,7 +14,7 @@ This is the canonical successor to the legacy [`CL-BAF/Kobald`](https://github.c
 
 **v0.1 foundation bootstrap plus a first scientific-execution slice (feature branch).**
 
-- One engine path is operational end-to-end (verified on Windows; Linux CI pending): SciPy ODE integration with Pint unit validation, a deny-by-default execution gate, a subprocess sandbox, independent closed-form verification, reproducible records and reports. See [scientific execution](docs/SCIENTIFIC_EXECUTION.md) and the [engine compatibility matrix](docs/SCIENCE_ENGINES.md).
+- One engine path is operational end-to-end (CI-verified on Ubuntu with Python 3.11 and 3.13 and on Windows with Python 3.13): SciPy ODE integration with Pint unit validation, a deny-by-default execution gate, a subprocess sandbox, independent closed-form verification, reproducible records and reports. See [scientific execution](docs/SCIENTIFIC_EXECUTION.md) and the [engine compatibility matrix](docs/SCIENCE_ENGINES.md).
 - Thirteen other engines are detected and smoke-tested but have no adapter; FEniCSx, PySCF, OpenFOAM and GROMACS are not installed on the development machine.
 - AI-driven tool execution is **not enabled**; only the model-provider protocol and the human-approval boundary exist.
 

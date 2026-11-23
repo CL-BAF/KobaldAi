@@ -1,7 +1,14 @@
 # Scientific engine compatibility matrix
 
 Evidence captured on 2026-11-23 on the development workstation (Windows 11 Pro
-10.0.26200, CPython 3.13.17, x86-64, no WSL2 installed). Re-check any machine with:
+10.0.26200, CPython 3.13.17, x86-64, no WSL2 installed). The Installed and Smoke
+columns describe that workstation only.
+
+The SciPy adapter's end-to-end tests also pass in GitHub Actions on Ubuntu (Python 3.11
+and 3.13) and Windows (Python 3.13), commit `bd07c04`. CI installs only
+`.[dev,science-core]`, so no other engine row has CI evidence.
+
+Re-check any machine with:
 
 ```powershell
 kobald-science engines            # side-effect-free detection (no engine is imported)
@@ -21,7 +28,7 @@ python scripts/engine_smoke.py    # imports each engine in an isolated subproces
 
 | Engine | Domain | Version found | Installed | Smoke | Adapter | Verified | Status |
 |---|---|---|---|---|---|---|---|
-| SciPy | mathematics | 1.18.1 | yes | pass | `damped_harmonic_oscillator` | yes (closed form; Windows only, Linux CI pending) | **Operational** |
+| SciPy | mathematics | 1.18.1 | yes | pass | `damped_harmonic_oscillator` | yes (closed form; CI: Ubuntu 3.11/3.13, Windows 3.13) | **Operational** |
 | NumPy | mathematics | 2.5.5 | yes | pass | used by verifier and figures | — | **Operational as support library** |
 | Pint | mathematics | 0.26.2 | yes | pass | used for unit validation | — | **Operational as support library** |
 | SymPy | mathematics | 1.14.0 | yes | pass | no (used in tests to cross-check the reference) | — | Partially integrated |

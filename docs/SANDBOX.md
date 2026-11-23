@@ -13,20 +13,21 @@ gaps below are closed and WARDEN/AUDITOR are migrated.
 | Property | Windows (Job Object) | Linux/macOS (process group + rlimits) |
 |---|---|---|
 | Separate interpreter, `python -I`, dedicated cwd/TEMP/HOME | enforced | enforced |
-| Environment scrubbed (no API keys or user variables) | **enforced, tested** | enforced (CI pending) |
-| Wall clock from spawn to tree reaped, total across experiment | **enforced, tested** | enforced (CI pending) |
-| Process-tree kill on timeout | **enforced, tested** (grandchild killed) | `killpg`; descendant calling `setsid` escapes |
-| Process-tree kill after normal exit | **enforced, tested** | `killpg` on group |
-| Memory limit | committed memory of whole job (`JOB_OBJECT_LIMIT_JOB_MEMORY`); **tested**: 600 MB allocation under a 256 MB cap → `MemoryError` | `RLIMIT_AS` per process (virtual address space, not resident memory) |
+| Environment scrubbed (no API keys or user variables) | **enforced, tested** | **enforced, tested** |
+| Wall clock from spawn to tree reaped, total across experiment | **enforced, tested** | **enforced, tested** |
+| Process-tree kill on timeout | **enforced, tested** (grandchild killed) | `killpg`, **tested** (grandchild killed); a descendant calling `setsid` escapes (untested gap) |
+| Process-tree kill after normal exit | **enforced, tested** | `killpg` on group, **tested** |
+| Memory limit | committed memory of whole job (`JOB_OBJECT_LIMIT_JOB_MEMORY`); **tested**: 600 MB allocation under a 256 MB cap → `MemoryError` | `RLIMIT_AS` per process (virtual address space, not resident memory); **tested**: same 600 MB allocation under 256 MB → `MemoryError` |
 | Peak memory recorded | job peak committed bytes | worker reports `VmPeak`/`VmHWM` |
 | Output size cap | enforced after exit | enforced after exit |
-| Network isolation | **NOT enforced**: a child connected to a localhost listener (test `..._gap`) | **NOT enforced** |
-| Filesystem confinement | **NOT enforced**: a child read and wrote files outside its workdir (test `..._gap`) | **NOT enforced** |
+| Network isolation | **NOT enforced**: a child connected to a localhost listener (test `..._gap`) | **NOT enforced** (same `..._gap` test passes) |
+| Filesystem confinement | **NOT enforced**: a child read and wrote files outside its workdir (test `..._gap`) | **NOT enforced** (same `..._gap` test passes) |
 | Reduced privileges | **NOT enforced**: the child runs with the user's full token and can read anything the user can, including credentials and SSH keys | **NOT enforced** |
 
 Windows results come from `tests/test_science_sandbox.py` on Windows 11 /
-CPython 3.13.17 (2026-11-23). Linux results are **not yet observed**: they need
-the Ubuntu CI jobs to run.
+CPython 3.13.17 (2026-11-23). Linux results come from the same tests, which have no
+platform skips, passing in GitHub Actions on `ubuntu-latest` with Python 3.11 and 3.13
+(commit `bd07c04`). macOS has not been tested.
 
 ### Known windows and limits
 
