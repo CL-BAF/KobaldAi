@@ -78,8 +78,8 @@ with an AST scan.
     reduction.
 
 The gate is a narrow precursor and **not** the WARDEN migration. WARDEN will wrap or
-replace it in its own reviewable change; see `MIGRATION.md` and
-`docs/migration/`. AI-driven execution is **not enabled**.
+replace it in its own reviewable change; see `MIGRATION.md` and the migration
+records on the `migration/warden` and `migration/auditor` branches. AI-driven execution is **not enabled**.
 
 ## Interrupted and failed runs
 

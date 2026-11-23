@@ -21,7 +21,7 @@ python scripts/engine_smoke.py    # imports each engine in an isolated subproces
 
 | Engine | Domain | Version found | Installed | Smoke | Adapter | Verified | Status |
 |---|---|---|---|---|---|---|---|
-| SciPy | mathematics | 1.18.1 | yes | pass | `damped_harmonic_oscillator` | yes (closed form) | **Operational** |
+| SciPy | mathematics | 1.18.1 | yes | pass | `damped_harmonic_oscillator` | yes (closed form; Windows only, Linux CI pending) | **Operational** |
 | NumPy | mathematics | 2.5.5 | yes | pass | used by verifier and figures | — | **Operational as support library** |
 | Pint | mathematics | 0.26.2 | yes | pass | used for unit validation | — | **Operational as support library** |
 | SymPy | mathematics | 1.14.0 | yes | pass | no (used in tests to cross-check the reference) | — | Partially integrated |
