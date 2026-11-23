@@ -157,7 +157,8 @@ def test_wall_time_counts_from_spawn_and_includes_termination(tmp_path: Path) ->
     outcome = _probe(tmp_path, "import time; time.sleep(60)", budget)
     elapsed = time.monotonic() - started
     assert outcome.status is SandboxStatus.TIMEOUT and outcome.result is None
-    assert 1.5 <= outcome.duration_s <= elapsed < 15
+    # Windows timers have ~15.6 ms granularity, so allow a small margin below 1.5 s.
+    assert 1.5 - 0.05 <= outcome.duration_s <= elapsed < 15
 
 
 def test_output_limit_is_enforced(tmp_path: Path) -> None:
