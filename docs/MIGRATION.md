@@ -40,6 +40,8 @@ verified from a fresh legacy checkout before implementation begins.
 | Security tool integrations | `integrations` | isolated plugins | deferred | asset scope and policy tests |
 | Hardware/sensor integrations | `integrations` | new isolated adapters | deferred | simulator tests before live devices |
 | Legacy `jarvis-core` paths/names | none | do not migrate | rejected | guardrail test |
+| (new) Scientific execution gate | `policy.science` | new narrow gate, not a WARDEN port | verified (own tests) | WARDEN must later wrap or replace it in its own change |
+| (new) Scientific job spec, sandbox, verifier | `research`, `runtime`, `supervisor` | new implementation | verified (own tests) | see docs/SCIENTIFIC_EXECUTION.md |
 
 ## Known failures that must become regression tests
 

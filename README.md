@@ -12,12 +12,16 @@ This is the canonical successor to the legacy [`CL-BAF/Kobald`](https://github.c
 
 ## Current status
 
-**v0.1 foundation bootstrap; scientific focus is a planned direction, not implemented functionality.**
+**v0.1 foundation bootstrap plus a first scientific-execution slice (feature branch).**
+
+- One engine path is operational end-to-end: SciPy ODE integration with Pint unit validation, a deny-by-default execution gate, a subprocess sandbox, independent closed-form verification, reproducible records and reports. See [scientific execution](docs/SCIENTIFIC_EXECUTION.md) and the [engine compatibility matrix](docs/SCIENCE_ENGINES.md).
+- Thirteen other engines are detected and smoke-tested but have no adapter; FEniCSx, PySCF, OpenFOAM and GROMACS are not installed on the development machine.
+- AI-driven tool execution is **not enabled**; only the model-provider protocol and the human-approval boundary exist.
 
 - Package and domain boundaries, architecture, roadmap, security and migration decisions are documented.
 - Automated quality checks and tests are configured.
 - No legacy runtime implementation has been migrated into this canonical repository yet.
-- Physics-engine adapters, chemical analysis workflows, scientific instrument connectors and end-to-end scientific experiments are **not implemented** here.
+- Physics-engine adapters other than the SciPy oscillator task, chemical analysis workflows and scientific instrument connectors are **not implemented** here.
 - The older Kobald prototype contains evidence/provenance and controlled research workflow foundations; these need deliberate migration and revalidation.
 
 See the [migration manifest](docs/MIGRATION.md) for component status and the [roadmap](docs/ROADMAP.md) for delivery stages.
@@ -39,7 +43,7 @@ KobaldAi currently requires Python 3.11 or newer.
 py -3.11 -m venv .venv
 .venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
-python -m pip install -e ".[dev]"
+python -m pip install -e ".[dev,science-core]"
 python -m pytest
 ```
 
@@ -94,7 +98,7 @@ Research question / hypothesis
 | Physics and engineering | Invoke simulation engines and analyse results | Proposed; no integration |
 | Chemistry | Use chemical datasets and computational analysis tools | Proposed; no integration |
 | Instruments and sensors | Read measurements through authenticated, documented connectors | Proposed; no live connector |
-| Mathematics and data science | Reproducible computations and statistical analysis | Proposed; no scientific execution engine |
+| Mathematics and data science | Reproducible computations and statistical analysis | First SciPy adapter operational and verified against a closed form |
 | Scientific evidence | Source lineage, units, assumptions, methods, comparison and review | Existing legacy foundations only; migration pending |
 
 Instrument control and any change to physical equipment must be explicitly authorised, policy-checked, independently interlocked where needed and reviewed by a qualified human operator. Start with **offline files, simulated instruments and read-only measurements**. An AI-generated command must never by itself authorise an experiment or device actuation.
@@ -112,6 +116,8 @@ Instrument control and any change to physical equipment must be explicitly autho
 ## Documentation
 
 - [Architecture](docs/ARCHITECTURE.md)
+- [Scientific execution framework](docs/SCIENTIFIC_EXECUTION.md)
+- [Scientific engine compatibility matrix](docs/SCIENCE_ENGINES.md)
 - [Roadmap](docs/ROADMAP.md)
 - [Migration manifest](docs/MIGRATION.md)
 - [Security model](docs/SECURITY.md)
