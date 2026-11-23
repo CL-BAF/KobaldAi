@@ -38,9 +38,20 @@ the Ubuntu CI jobs to run.
   with status `setup_error`; the child is killed.
 - `RLIMIT_AS` limits virtual address space. BLAS libraries reserve large virtual
   regions, so an `RLIMIT_AS` cap can fail a job whose resident memory is small.
-  Whether 512 MB is enough for SciPy jobs on Linux is measured by
-  `scripts/memory_probe.py` in CI and is **not yet known**. Do not lower the
-  default (`memory_mb=1024`) before that evidence exists.
+  `scripts/memory_probe.py` ran the oscillator demo in Ubuntu CI (Python 3.11)
+  under these `RLIMIT_AS` caps:
+
+  | Cap | Result |
+  |---|---|
+  | 256 MB | failed: OpenBLAS could not allocate its buffers |
+  | 384 MB | passed |
+  | 512 MB | passed |
+  | 768 MB | passed |
+  | 1024 MB | passed |
+
+  This shows only that this one small SciPy job fits in 512 MB on that runner.
+  It is not evidence that other engines or larger workloads do. The default
+  stays at `memory_mb=1024`.
 - Memory is a per-process limit; it is not summed across the three executions.
   Wall time and output bytes are experiment totals.
 

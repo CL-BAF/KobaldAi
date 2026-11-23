@@ -9,6 +9,7 @@ units are preserved in the execution record.
 from __future__ import annotations
 
 import math
+import tokenize
 from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import Any
@@ -104,7 +105,13 @@ def dimensionality_of(unit: str) -> str:
 def _parse(name: str, quantity: QuantitySpec) -> pint.Quantity:
     try:
         return _UREG.Quantity(quantity.value, quantity.unit)
-    except (pint.errors.PintError, AttributeError, TypeError, ValueError) as error:
+    except (
+        pint.errors.PintError,
+        tokenize.TokenError,  # Python 3.11: unbalanced brackets such as "m)"
+        AttributeError,
+        TypeError,
+        ValueError,
+    ) as error:
         raise UnitValidationError(f"{name}: cannot parse unit {quantity.unit!r}") from error
 
 
